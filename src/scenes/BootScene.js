@@ -1,5 +1,5 @@
 /**
- * BootScene.js — Инициализация Telegram WebApp + загрузка ассетов
+ * BootScene.js — Инициализация Telegram WebApp + генерация процедурных текстур
  */
 import { THEME } from '../../config.js';
 
@@ -7,107 +7,115 @@ export class BootScene extends Phaser.Scene {
   constructor() { super({ key: 'Boot' }); }
 
   preload() {
-    // ── Telegram WebApp init ──────────────
     if (typeof Telegram !== 'undefined') {
       Telegram.WebApp.ready();
       Telegram.WebApp.expand();
       Telegram.WebApp.disableVerticalSwipes?.();
     }
-
-    // ── Прогресс-бар загрузки ─────────────
     this._createLoadingBar();
+  }
 
-    // ── Заглушки ассетов (пока нет реальных файлов) ──
-    // В продакшене замени на реальные изображения из THEME.assets
+  create() {
     this._createFallbackTextures();
-
-    // ── Звуки ────────────────────────────
-    // this.load.audio('bgMusic',   THEME.assets.bgMusic);
-    // this.load.audio('sfxBolt',   THEME.assets.sfxBolt);
-    // this.load.audio('sfxWin',    THEME.assets.sfxWin);
-    // this.load.audio('sfxLose',   THEME.assets.sfxLose);
+    this.scene.start('Menu');
   }
 
   _createLoadingBar() {
     const { width, height } = this.cameras.main;
     const cx = width / 2, cy = height / 2;
 
-    // Фон
     this.add.rectangle(0, 0, width, height, 0x0a0a1a).setOrigin(0);
 
-    // Логотип / название
-    this.add.text(cx, cy - 80, 'BOLT DROP', {
-      fontFamily: 'Orbitron, monospace',
-      fontSize:   32,
-      color:      '#00fff5',
-      stroke:     '#00fff5',
-      strokeThickness: 1,
+    this.add.text(cx, cy - 60, 'BOLT DROP', {
+      fontFamily: 'monospace',
+      fontSize: 32,
+      fontStyle: 'bold',
+      color: '#00fff5',
     }).setOrigin(0.5);
 
-    this.add.text(cx, cy - 44, THEME.name.toUpperCase(), {
-      fontFamily: 'Share Tech Mono, monospace',
-      fontSize:   14,
-      color:      '#ff00a8',
-      letterSpacing: 4,
+    this.add.text(cx, cy - 24, THEME.name.toUpperCase(), {
+      fontFamily: 'monospace',
+      fontSize: 14,
+      color: '#ff00a8',
     }).setOrigin(0.5);
 
-    // Полоска прогресса
-    const barW = 240, barH = 8;
-    const barBg = this.add.rectangle(cx, cy + 20, barW, barH, 0x1a1a3e).setOrigin(0.5);
-    const barFg = this.add.rectangle(cx - barW / 2, cy + 20, 0, barH, 0x00fff5).setOrigin(0, 0.5);
-
-    this.load.on('progress', v => { barFg.width = barW * v; });
-    this.load.on('complete', () => { barFg.width = barW; });
+    this.add.text(cx, cy + 10, 'Загрузка...', {
+      fontFamily: 'monospace',
+      fontSize: 12,
+      color: '#555599',
+    }).setOrigin(0.5);
   }
 
   _createFallbackTextures() {
-    // Генерируем процедурные текстуры через Graphics, если реальных нет
     const g = this.make.graphics({ add: false });
 
-    // ball
+    // ── ball (жёлтый круг) ──────────────────
     g.clear();
-    g.fillStyle(0xffe600).fillCircle(20, 20, 18);
+    g.fillStyle(0xffe600);
+    g.fillCircle(20, 20, 18);
+    g.lineStyle(2, 0xffaa00);
     g.strokeCircle(20, 20, 18);
+    // Блик
+    g.fillStyle(0xffffff, 0.4);
+    g.fillCircle(13, 13, 5);
     g.generateTexture('ball', 40, 40);
 
-    // platform plank
+    // ── platform (тёмно-синяя планка) ───────
     g.clear();
-    g.fillStyle(0x1a1a3e).fillRect(0, 0, 160, 16);
-    g.lineStyle(2, 0x00fff5).strokeRect(0, 0, 160, 16);
+    g.fillStyle(0x1a1a3e);
+    g.fillRect(0, 0, 160, 16);
+    g.lineStyle(2, 0x00fff5);
+    g.strokeRect(0, 0, 160, 16);
+    g.lineStyle(1, 0x00fff5, 0.25);
+    for (let x = 20; x < 160; x += 20) {
+      g.moveTo(x, 0); g.lineTo(x, 16);
+    }
+    g.strokePath();
     g.generateTexture('platform', 160, 16);
 
-    // bolt
+    // ── danger platform (красная) ────────────
     g.clear();
-    g.fillStyle(0xff00a8).fillCircle(12, 12, 10);
-    g.lineStyle(2, 0xff69c8).strokeCircle(12, 12, 10);
-    g.generateTexture('bolt', 24, 24);
-
-    // goal cup
-    g.clear();
-    g.fillStyle(0x00fff5, 0.3).fillCircle(24, 24, 22);
-    g.lineStyle(3, 0x00fff5).strokeCircle(24, 24, 22);
-    g.generateTexture('goal', 48, 48);
-
-    // danger (красная платформа)
-    g.clear();
-    g.fillStyle(0x330000).fillRect(0, 0, 160, 16);
-    g.lineStyle(2, 0xff2222).strokeRect(0, 0, 160, 16);
+    g.fillStyle(0x330000);
+    g.fillRect(0, 0, 160, 16);
+    g.lineStyle(2, 0xff2222);
+    g.strokeRect(0, 0, 160, 16);
     g.generateTexture('danger_platform', 160, 16);
 
-    // частица болта
+    // ── bolt (маджента круг с крестом) ───────
     g.clear();
-    g.fillStyle(0xff00a8).fillRect(0, 0, 4, 4);
-    g.generateTexture('particle_bolt', 4, 4);
+    g.fillStyle(0xff00a8);
+    g.fillCircle(14, 14, 12);
+    g.lineStyle(2, 0xff69c8);
+    g.strokeCircle(14, 14, 12);
+    g.lineStyle(2, 0xffffff, 0.7);
+    g.moveTo(9, 14); g.lineTo(19, 14);
+    g.moveTo(14, 9); g.lineTo(14, 19);
+    g.strokePath();
+    g.generateTexture('bolt', 28, 28);
 
-    // частица победы
+    // ── goal (циановое кольцо) ───────────────
     g.clear();
-    g.fillStyle(0x00fff5).fillStar(6, 6, 5, 6, 3);
+    g.fillStyle(0x00fff5, 0.15);
+    g.fillCircle(28, 28, 26);
+    g.lineStyle(3, 0x00fff5, 0.9);
+    g.strokeCircle(28, 28, 26);
+    g.lineStyle(1, 0x00fff5, 0.4);
+    g.strokeCircle(28, 28, 34);
+    g.generateTexture('goal', 56, 56);
+
+    // ── particle_bolt (маленькая точка) ──────
+    g.clear();
+    g.fillStyle(0xff00a8);
+    g.fillCircle(3, 3, 3);
+    g.generateTexture('particle_bolt', 6, 6);
+
+    // ── particle_win (маленький ромб) ────────
+    g.clear();
+    g.fillStyle(0x00fff5);
+    g.fillTriangle(6, 0, 12, 6, 6, 12);
+    g.fillTriangle(6, 12, 0, 6, 6, 0);
     g.generateTexture('particle_win', 12, 12);
 
     g.destroy();
-  }
-
-  create() {
-    this.scene.start('Menu');
   }
 }

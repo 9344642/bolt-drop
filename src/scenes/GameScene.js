@@ -499,18 +499,19 @@ export class GameScene extends Phaser.Scene {
   }
 
   _spawnWinParticles() {
-    const { W, H } = this;
     const [gx, gy] = this.levelData.goal;
+    const colors = [0x00fff5, 0xffe600, 0xff00a8];
     for (let i = 0; i < 24; i++) {
-      const p = this.add.star(gx, gy, 5, 4, 8, [0x00fff5, 0xffe600, 0xff00a8][i % 3]);
+      const p = this.add.circle(gx, gy, 4 + Math.random() * 4, colors[i % 3]);
       const angle = Math.random() * Math.PI * 2;
       const speed = 80 + Math.random() * 140;
       this.tweens.add({
         targets: p,
         x: gx + Math.cos(angle) * speed,
         y: gy + Math.sin(angle) * speed,
-        angle: 360,
         alpha: 0,
+        scaleX: 0.1,
+        scaleY: 0.1,
         duration: 800 + Math.random() * 400,
         ease: 'Power2',
         onComplete: () => p.destroy(),
