@@ -1,13 +1,9 @@
 /**
  * GameScene.js — Основная игровая сцена
  * Движок: Phaser 3 + Matter.js
- *
- * Механика:
- *   - Шар (ball) спавнится сверху, падает под гравитацией
- *   - Платформы статичны, удерживаются болтами
- *   - Тап по болту → снимает его → если все болты платформы сняты → она падает
- *   - Цель: шар должен попасть в зону goal
+ * Механика: тап по болту → платформа падает → шар катится в цель
  */
+import Phaser from 'phaser';
 import { THEME, GAME_CONFIG }    from '../../config.js';
 import { getLevel, calcStars }   from '../levels.js';
 import { Storage }               from '../storage.js';

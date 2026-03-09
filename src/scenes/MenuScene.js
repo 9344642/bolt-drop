@@ -1,6 +1,7 @@
 /**
  * MenuScene.js — Главное меню с сеткой уровней
  */
+import Phaser from 'phaser';
 import { THEME, GAME_CONFIG }  from '../../config.js';
 import { Storage }              from '../storage.js';
 import { LEVELS, TOTAL_LEVELS } from '../levels.js';

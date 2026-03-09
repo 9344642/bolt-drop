@@ -1,6 +1,7 @@
 /**
  * BootScene.js — Инициализация Telegram WebApp + генерация процедурных текстур
  */
+import Phaser from 'phaser';
 import { THEME } from '../../config.js';
 
 export class BootScene extends Phaser.Scene {
