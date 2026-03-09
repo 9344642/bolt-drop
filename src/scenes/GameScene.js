@@ -169,7 +169,7 @@ export class GameScene extends Phaser.Scene {
     const remainingBolts = new Set(pd.bolts);
 
     pd.bolts.forEach(boltSide => {
-      const [bx, by] = this._boltLocalPos(boltSide, w, h);
+      const [bx, by] = this._boltLocalPos(boltSide, w);
       const wx = pd.x + bx * Math.cos(angleRad) - by * Math.sin(angleRad);
       const wy = pd.y + bx * Math.sin(angleRad) + by * Math.cos(angleRad);
 
@@ -177,8 +177,7 @@ export class GameScene extends Phaser.Scene {
       this._drawBolt(boltGfx, 0, 0, false);
       boltGfx.setPosition(wx, wy);
 
-      const zone = this.add.zone(wx, wy, P.boltRadius * 2.5, P.boltRadius * 2.5)
-        .setInteractive();
+      const zone = this.add.zone(wx, wy, 48, 48).setInteractive();
       zone.on('pointerdown', () => this._removeBolt(pd.id, boltSide, body, remainingBolts, boltGfx, zone, container));
 
       boltSprites.push({ gfx: boltGfx, zone, side: boltSide });
@@ -187,26 +186,44 @@ export class GameScene extends Phaser.Scene {
     this.platforms.push({ id: pd.id, body, container, boltSprites, remainingBolts, isDanger: pd.danger });
   }
 
-  _boltLocalPos(side, w, h) {
+  // Болты — на поверхности платформы, не на краях
+  _boltLocalPos(side, w) {
     switch (side) {
-      case 'left':   return [-w / 2, 0];
-      case 'right':  return [ w / 2, 0];
+      case 'left':   return [-w * 0.28, 0];
+      case 'right':  return [ w * 0.28, 0];
       case 'center': return [0, 0];
       default:       return [0, 0];
     }
   }
 
   _drawBolt(gfx, x, y, highlighted = false) {
+    const R = 16; // крупнее чем раньше
     gfx.clear();
-    gfx.fillStyle(highlighted ? 0xffff00 : 0xff00a8);
-    gfx.fillCircle(x, y, P.boltRadius);
-    gfx.lineStyle(2, highlighted ? 0xffff88 : 0xff69c8);
-    gfx.strokeCircle(x, y, P.boltRadius);
-    // Крестик болта
-    const s = P.boltRadius * 0.4;
-    gfx.lineStyle(2, 0xffffff, 0.6);
-    gfx.moveTo(x - s, y).lineTo(x + s, y);
-    gfx.moveTo(x, y - s).lineTo(x, y + s);
+
+    // Тень / glow
+    gfx.fillStyle(highlighted ? 0xffee00 : 0xff00a8, 0.25);
+    gfx.fillCircle(x, y, R + 6);
+
+    // Основной круг
+    gfx.fillStyle(highlighted ? 0xffee00 : 0xff00a8, 1);
+    gfx.fillCircle(x, y, R);
+
+    // Обводка
+    gfx.lineStyle(2.5, highlighted ? 0xffff88 : 0xffffff, 0.9);
+    gfx.strokeCircle(x, y, R);
+
+    // Внутренний круг (шляпка болта)
+    gfx.fillStyle(0x000000, 0.3);
+    gfx.fillCircle(x, y, R * 0.55);
+
+    // Крест (прорезь болта)
+    const s = R * 0.38;
+    gfx.lineStyle(2.5, 0xffffff, 0.85);
+    gfx.beginPath();
+    gfx.moveTo(x - s, y);
+    gfx.lineTo(x + s, y);
+    gfx.moveTo(x, y - s);
+    gfx.lineTo(x, y + s);
     gfx.strokePath();
   }
 
