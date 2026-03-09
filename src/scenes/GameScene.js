@@ -51,6 +51,17 @@ export class GameScene extends Phaser.Scene {
 
     // Кнопка подсказки
     document.getElementById('btn-hint')?.addEventListener('click', () => this._useHint(), { once: false });
+
+    // Кнопка меню — возврат в MenuScene
+    this._menuHandler = () => {
+      if (typeof Telegram !== 'undefined') {
+        Telegram.WebApp.HapticFeedback?.impactOccurred('light');
+      }
+      // Убираем result-overlay если есть
+      document.querySelector('.result-overlay')?.remove();
+      this.scene.start('Menu');
+    };
+    document.getElementById('btn-menu')?.addEventListener('click', this._menuHandler);
   }
 
   // ── Физический мир ────────────────────────────────────────────
@@ -533,5 +544,6 @@ export class GameScene extends Phaser.Scene {
 
   shutdown() {
     window.removeEventListener('bolt:purchase', this._onPurchase.bind(this));
+    document.getElementById('btn-menu')?.removeEventListener('click', this._menuHandler);
   }
 }
