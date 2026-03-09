@@ -64,7 +64,6 @@ export class GameScene extends Phaser.Scene {
 
   _setupPhysics() {
     this.matter.world.setGravity(0, P.gravity);
-    this.matter.world.on('collisionstart', this._onCollision.bind(this));
   }
 
   _createBoundaries() {
