@@ -1,7 +1,4 @@
 {
-  "framework": "vite",
-  "buildCommand": "npm run build",
-  "outputDirectory": "dist",
   "headers": [
     {
       "source": "/(.*)",
@@ -9,12 +6,6 @@
         { "key": "X-Frame-Options", "value": "ALLOWALL" },
         { "key": "Content-Security-Policy", "value": "frame-ancestors *" }
       ]
-    }
-  ],
-  "crons": [
-    {
-      "path": "/api/daily-theme",
-      "schedule": "0 4 * * *"
     }
   ]
 }
